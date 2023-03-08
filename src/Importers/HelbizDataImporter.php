@@ -110,4 +110,5 @@ class HelbizDataImporter extends DataImporter implements HardcodedDataSource
             "Singapore",
         ];
     }
+
 }

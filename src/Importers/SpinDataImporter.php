@@ -36,7 +36,8 @@ class SpinDataImporter extends DataImporter implements HtmlDataSource
                 continue;
             }
 
-            $nodeClasses = $section->parentNode->parentNode->parentNode->getAttribute("class");
+            //$nodeClasses = $section->parentNode->parentNode->parentNode->getAttribute('class');
+            $nodeClasses = $section->parentNode->parentNode->parentNode::class;
             $countryName = match (true) {
                 str_contains($nodeClasses, "locations-list-") => ucfirst(str_replace(
                     "locations-list-",

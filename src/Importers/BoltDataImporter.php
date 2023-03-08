@@ -19,7 +19,7 @@ class BoltDataImporter extends DataImporter implements JsonDataSource
     }
 
     public function extract(): static
-    {
+    {   
         $client = new Client();
         $response = $client->get("https://bolt.eu/page-data/en/scooters/page-data.json");
         $content = json_decode($response->getBody()->getContents(), true);

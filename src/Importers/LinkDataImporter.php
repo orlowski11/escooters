@@ -21,53 +21,58 @@ class LinkDataImporter extends DataImporter implements HtmlDataSource
     public function extract(): static
     {
         $client = new Client();
-        $html = $client->get("http://www.link.city/cities")->getBody()->getContents();
+        $html = $client->get("https://superpedestrian.com/locations")->getBody()->getContents();
 
         $crawler = new Crawler($html);
-        $this->sections = $crawler->filter("#content .sqs-row.row > .col p > strong");
+        $this->sections = $crawler->filter(" div.sqs-block.html-block.sqs-block-html > div.sqs-block-content > p");
 
         return $this;
     }
 
     public function transform(): static
-    {
-        /** @var DOMElement $section */
-        foreach ($this->sections as $section) {
-            foreach ($section->childNodes as $node) {
-                $countryName = trim($node->nodeValue);
-                if (in_array($countryName, ["Tech-Enabled Compliance", "COVID-19 RAPID RESPONSE CASE STUDY"], true)) {
-                    continue;
+    {   
+        $exclude = [
+        "Ride with us in cities around the world!",
+        "Press",
+        "Careers",
+        "Privacy Policy",
+        "Cookie Policy",
+        "Terms & Conditions",
+        "Contact",
+        "Get Help",
+        "Select Language",
+        "Superpedestrian HQ 84 Hamilton St, Cambridge, MA 02139",
+        "California",
+        "Connecticut",
+        "Illinois",
+        "Kansas",
+        "Maryland",
+        "Michigan",
+        "New Jersey",
+        "Ohio",
+        "Tennessee",
+        "Texas",
+        "Virginia",
+        "Washington"
+        ];
+
+        $currentCountry = "United States";
+        foreach($this->sections as $section)
+        {
+            $name = $section->nodeValue;
+            if(!(in_array($name, $exclude)))
+            {
+                if($section->firstChild->nodeName === "strong")
+                {
+                    $currentCountry = trim($name);
                 }
-
-                $country = $this->countries->retrieve($countryName);
-
-                foreach ($node->parentNode->parentNode->parentNode->childNodes as $i => $cityName) {
-                    if ($i === 0 || !trim($cityName->nodeValue)) {
-                        continue;
-                    }
-
-                    $name = $cityName->nodeValue;
-                    if ($country->getId() === "us" && str_contains($name, ", ")) {
-                        $name = explode(",", $name)[0];
-                    }
-
-                    $cities = [];
-                    if (str_contains($name, "(") && str_contains($name, ")")) {
-                        $names = explode("(", $name)[1];
-                        $names = explode(")", $names)[0];
-                        $names = explode(", ", $names);
-                        foreach ($names as $name) {
-                            $cities[] = str_replace("*", "", $name);
-                        }
-                    } else {
-                        $cities[] = $name;
-                    }
-
-                    foreach ($cities as $name) {
-                        $city = $this->cities->retrieve($name, $country);
-                        $this->provider->addCity($city);
-                    }
+                else
+                {
+                    $country = $this->countries->retrieve($currentCountry);
+                    $city = $this->cities->retrieve($name, $country);
+                    $this->provider->addCity($city);
                 }
+                
             }
         }
 
