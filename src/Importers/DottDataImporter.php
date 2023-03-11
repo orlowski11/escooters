@@ -27,39 +27,30 @@ class DottDataImporter extends DataImporter implements HtmlDataSource
         $html = file_get_contents("https://ridedott.com/ride-with-us/paris/");
 
         $crawler = new Crawler($html);
-        $this->sections = $crawler->filter(".p-small mb-1");
+        $this->sections = $crawler->filter("li.p-small.mb-1");
 
         return $this;
     }
 
     public function transform(): static
     {
-        foreach ($this->sections as $section) {
-            $country = null;
+        $currentCountry = "Italy";
+        foreach ($this->sections as $section) 
+        {
+            $name = trim($section->nodeValue);
+            $currentCountry = trim($section->parentNode->previousSibling->previousSibling->nodeValue);
+            if($currentCountry == "UK"){
+                $currentCountry = "United Kingdom";
+            }  
 
-            foreach ($section->childNodes as $node) {
-                if ($node->nodeName === "a") {
-                    $value = trim($node->nodeValue);
-                    foreach ($node->childNodes as $city) {
-                        if ($city->nodeName === "i") {
-                            try {
-                                $hardcoded = HardcodedCitiesToCountriesAssigner::assign($value);
-                                if ($hardcoded) {
-                                    $country = $this->countries->retrieve($hardcoded);
-                                }
-        
-                                $city = $this->cities->retrieve($value, $country);
-                                $this->provider->addCity($city);
-                            } catch (CityNotAssignedToAnyCountryException $exception) {
-                                echo $exception->getMessage() . PHP_EOL;
-                                continue;
-                            }
-                        }
-                    }
-                }
-            }
+            $country = $this->countries->retrieve($currentCountry);
+            $city = $this->cities->retrieve($name, $country);
+            $this->provider->addCity($city);
+
         }
-
+        
         return $this;
     }
+
 }
+
