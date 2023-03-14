@@ -41,12 +41,12 @@ class MapboxGeocodingService
 
     protected function getFromAPI(Client $client, City $city): void
     {
-        /*$name = $city->getName() . ", " . $city->getCountry()->getName();
+        $name = $city->getName() . ", " . $city->getCountry()->getName();
         $token = $this->token;
 
         try {
             $response = $client->get(
-                "https://api.mapbox.com/geocoding/v5/mapbox.places/${name}.json?access_token=${token}&types=place",
+                "https://api.mapbox.com/geocoding/v5/mapbox.places/${name}.json?access_token=${token}",
             );
             $coordinates = json_decode($response->getBody()->getContents(), true)["features"][0]["center"];
             $this->cache[$city->getId()] = $coordinates;
@@ -55,9 +55,9 @@ class MapboxGeocodingService
             echo "Coordinates for ${name} were not fetched.";
         }
 
-        file_put_contents(static::CACHE_FILENAME, json_encode($this->cache, JSON_UNESCAPED_UNICODE));*/
+        file_put_contents(static::CACHE_FILENAME, json_encode($this->cache, JSON_UNESCAPED_UNICODE));
 
-        $name = $city->getName();
+        /*$name = $city->getName();
         $country = $city->getCountry()->getName();
         $token = $this->token;
 
@@ -69,9 +69,9 @@ class MapboxGeocodingService
             $this->cache[$city->getId()] = $coordinates;
             $city->setCoordinates($coordinates);
         } catch (GuzzleException) {
-            echo "Coordinates for ${name} were not fetched.";
+            echo "Coordinates for ${name}, ${country} were not fetched.";
         }
 
-        file_put_contents(static::CACHE_FILENAME, json_encode($this->cache, JSON_UNESCAPED_UNICODE));
+        file_put_contents(static::CACHE_FILENAME, json_encode($this->cache, JSON_UNESCAPED_UNICODE));*/
     }
 }
